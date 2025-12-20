@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/Users/alex/Documents/projects/teamspeak-clone/src/cpp/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -I/opt/homebrew/Cellar/portaudio/19.7.0/include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -o CMakeFiles/voip.dir/main.cpp.o -c /Users/alex/Documents/projects/teamspeak-clone/src/cpp/main.cpp",
+  "file": "/Users/alex/Documents/projects/teamspeak-clone/src/cpp/main.cpp",
+  "output": "CMakeFiles/voip.dir/main.cpp.o"
+},
+{
+  "directory": "/Users/alex/Documents/projects/teamspeak-clone/src/cpp/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -I/opt/homebrew/Cellar/portaudio/19.7.0/include -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk -Wall -Wextra -o CMakeFiles/voip.dir/voip.cpp.o -c /Users/alex/Documents/projects/teamspeak-clone/src/cpp/voip.cpp",
+  "file": "/Users/alex/Documents/projects/teamspeak-clone/src/cpp/voip.cpp",
+  "output": "CMakeFiles/voip.dir/voip.cpp.o"
+}
+]
