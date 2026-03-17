@@ -1,13 +1,15 @@
 #pragma once
 #include "portaudio.h"
+#include <arpa/inet.h>
 #include <cstdint>
+#include <ostream>
+#include <sstream>
+#include <string>
 #include <thread>
+#include <unistd.h>
 #include <vector>
 
 class Voip {
-public:
-  using IP = std::vector<uint8_t>;
-
 private:
   static Voip *voip;
   std::thread *callThread = nullptr;
@@ -15,7 +17,17 @@ private:
   void processData();
   void terminateThread();
   void spawnThread();
-  std::vector<IP> connections;
+  std::vector<std::string> connections;
+  int createSocket(int port);
+  void closeSocket();
+  int sock;
+  float *transmissionBuffer;
+  float *receptionBuffer;
+  int bufferLen;
+  bool sockOpen = false;
+  sockaddr_in server{};
+  void udpSend(int port);
+  void udpRecieve(int port);
   static int micCallback(const void *inputBuffer, void *outputBuffer,
                          unsigned long frameCount,
                          const PaStreamCallbackTimeInfo *timeInfo,
@@ -23,10 +35,9 @@ private:
 
 public:
   Voip();
-  static IP stoIP(std::string s);
-  void join(IP ip);
+  void join(std::string ip);
   void leave();
   std::thread *getThread();
   static Voip *getVoip() { return voip; };
-  const std::vector<IP> &getConnections() { return connections; };
+  const std::vector<std::string> &getConnections() { return connections; };
 };

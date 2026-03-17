@@ -1,0 +1,9 @@
+.DS_Store
+build/
+src/cpp/build/
+src/cpp/.cache/
+src/cpp/cpp/
+src/cpp/CMakeFiles/
+src/.DS_Store
+.idea/
+./idea/workspace.xml
