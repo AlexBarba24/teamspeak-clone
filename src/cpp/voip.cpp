@@ -55,6 +55,10 @@ void Voip::processData() {
   }
 
   PaStream *stream;
+  numInputChannels =
+      Pa_GetDeviceInfo(Pa_GetDefaultInputDevice())->maxInputChannels;
+  numOutputChannels =
+      Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice())->maxOutputChannels;
 
   err = Pa_OpenDefaultStream(
       &stream, 1,   /* no input channels */
@@ -96,15 +100,30 @@ int Voip::micCallback(const void *inputBuffer, void *outputBuffer,
                       unsigned long frameCount,
                       const PaStreamCallbackTimeInfo *timeInfo,
                       PaStreamCallbackFlags statusFlags, void *userData) {
-
   Voip *voip = Voip::getVoip();
   float *in = (float *)inputBuffer;
   float *out = (float *)outputBuffer;
   for (unsigned long i = 0; i < frameCount * 2; i += 2) {
-    voip->transmissionBuffer[i] = in[i];
-    voip->transmissionBuffer[i + 1] = in[i];
-    out[i] = voip->receptionBuffer[i];
-    out[i + 1] = voip->receptionBuffer[i + 1];
+    if (voip->numInputChannels == 1) {
+      voip->transmissionBuffer[i] = in[i / 2];
+      voip->transmissionBuffer[i + 1] = in[i / 2];
+    } else if (voip->numInputChannels == 2) {
+      voip->transmissionBuffer[i] = in[i];
+      voip->transmissionBuffer[i + 1] = in[i + 1];
+    } else {
+      voip->transmissionBuffer[i] = 0;
+      voip->transmissionBuffer[i + 1] = 0;
+    }
+    if (voip->numOutputChannels == 1) {
+      out[i] = voip->receptionBuffer[i / 2];
+      out[i + 1] = voip->receptionBuffer[i / 2];
+    } else if (voip->numOutputChannels == 2) {
+      out[i] = voip->receptionBuffer[i];
+      out[i + 1] = voip->receptionBuffer[i + 1];
+    } else {
+      out[i] = 0;
+      out[i + 1] = 0;
+    }
   }
   for (auto &ip : voip->getConnections()) {
     if (inet_pton(AF_INET, ip.c_str(), &voip->server.sin_addr) <= 0) {

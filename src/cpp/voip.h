@@ -11,6 +11,8 @@
 
 class Voip {
 private:
+  int numInputChannels = 0;
+  int numOutputChannels = 0;
   static Voip *voip;
   std::thread *callThread = nullptr;
   bool killThread = false;

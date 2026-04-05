@@ -7,3 +7,5 @@ src/cpp/CMakeFiles/
 src/.DS_Store
 .idea/
 ./idea/workspace.xml
+node_modules
+resources/voip

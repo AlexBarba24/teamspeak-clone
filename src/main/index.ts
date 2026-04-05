@@ -2,10 +2,14 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import VoipProcessController from './voip/VoipProcessController'
+
+let mainWindow: BrowserWindow | null = null
+const voipController = new VoipProcessController()
 
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -17,11 +21,13 @@ function createWindow(): void {
     }
   })
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+  mainWindow = win
+
+  win.on('ready-to-show', () => {
+    win.show()
   })
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
+  win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
@@ -29,9 +35,9 @@ function createWindow(): void {
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    win.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
 
@@ -52,6 +58,35 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
+  // VOIP IPC bridge
+  ipcMain.handle('voip:ensureStarted', async () => {
+    await voipController.ensureStarted()
+    return { ok: true }
+  })
+
+  ipcMain.handle('voip:join', async (_event, payload: { ip: string }) => {
+    const ip = payload?.ip
+    if (typeof ip !== 'string' || ip.trim().length === 0) {
+      throw new Error('voip:join requires payload { ip: string }')
+    }
+    await voipController.join(ip)
+    return { ok: true }
+  })
+
+  ipcMain.handle('voip:leave', async () => {
+    await voipController.leave()
+    return { ok: true }
+  })
+
+  ipcMain.handle('voip:stop', async () => {
+    await voipController.stop()
+    return { ok: true }
+  })
+
+  voipController.on('voip:event', (evt: unknown) => {
+    mainWindow?.webContents.send('voip:event', evt)
+  })
+
   createWindow()
 
   app.on('activate', function () {
@@ -59,6 +94,11 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  // Best-effort shutdown to avoid leaving the audio device locked.
+  voipController.stop().catch(() => {})
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

@@ -10,8 +10,7 @@ int main() {
     case 'c': {
       std::string ipString;
       std::cin >> ipString;
-      Voip::IP ip = Voip::stoIP(ipString);
-      voip.join(ip);
+      voip.join(ipString);
       break;
     }
     case 'd': {
